@@ -1,0 +1,40 @@
+
+---
+
+# 7. GitHub Actions：`.github/workflows/build.yml`
+
+如果你准备直接放 GitHub，这个文件可以自动编译：
+
+```yaml
+name: Build NoProximityCall
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Theos
+        uses: iossxx/theos-action@v1
+        with:
+          theos-src: https://github.com/roothide/theos
+          theos-sdks: https://github.com/theos/sdks
+
+      - name: Build RootHide DEB
+        run: |
+          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
+
+      - name: List packages
+        run: |
+          ls -lah packages/
+
+      - name: Upload DEB
+        uses: actions/upload-artifact@v4
+        with:
+          name: NoProximityCall-RootHide
+          path: packages/*.deb
