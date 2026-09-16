@@ -1,11 +1,3 @@
-
----
-
-# 7. GitHub Actions：`.github/workflows/build.yml`
-
-如果你准备直接放 GitHub，这个文件可以自动编译：
-
-```yaml
 name: Build NoProximityCall
 
 on:
@@ -13,24 +5,44 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Theos
-        uses: iossxx/theos-action@v1
-        with:
-          theos-src: https://github.com/roothide/theos
-          theos-sdks: https://github.com/theos/sdks
+      - name: Install Theos
+        shell: bash
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/roothide/theos/master/bin/install-theos)"
+
+      - name: Install iOS SDK
+        shell: bash
+        run: |
+          mkdir -p "$THEOS/sdks"
+
+          curl -L \
+            "https://github.com/theos/sdks/releases/latest/download/iPhoneOS16.5.sdk.tar.xz" \
+            -o /tmp/iPhoneOS16.5.sdk.tar.xz
+
+          tar -xJf /tmp/iPhoneOS16.5.sdk.tar.xz \
+            -C "$THEOS/sdks"
 
       - name: Build RootHide DEB
+        shell: bash
         run: |
-          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
+          export THEOS="$HOME/theos"
 
-      - name: List packages
+          make clean
+
+          make package \
+            FINALPACKAGE=1 \
+            THEOS_PACKAGE_SCHEME=roothide
+
+      - name: Show package
+        shell: bash
         run: |
+          echo "===== Generated packages ====="
           ls -lah packages/
 
       - name: Upload DEB
@@ -38,3 +50,4 @@ jobs:
         with:
           name: NoProximityCall-RootHide
           path: packages/*.deb
+          if-no-files-found: error
