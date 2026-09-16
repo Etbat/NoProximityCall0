@@ -1,0 +1,10 @@
+Package: com.dinson.noproximitycall
+Name: NoProximityCall
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Description: Keep the screen on during Phone and WeChat calls by disabling proximity monitoring.
+Maintainer: DINSON
+Author: DINSON
+Section: Tweaks
+Priority: optional
+Depends: mobilesubstrate
